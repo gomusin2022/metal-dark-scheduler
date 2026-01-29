@@ -51,6 +51,7 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
   };
 
   return (
+    // 전체 높이는 유지 (p-4, gap-3 등 구조 고정)
     <header className="sticky top-0 z-50 bg-[#1a1a2e] border-b border-[#3a3a5e] p-4 flex flex-col shadow-2xl transition-all duration-300 gap-3">
       
       {/* 1단: 타이틀(좌) + 날짜/시간(우) */}
@@ -59,7 +60,7 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
           {isEditingTitle ? (
             <input
               autoFocus
-              className="bg-[#2c2c2e] border border-blue-500 rounded px-2 py-1 text-xl md:text-3xl font-black w-full outline-none text-white"
+              className="bg-[#2c2c2e] border border-blue-500 rounded px-2 py-1 text-2xl md:text-4xl font-black w-full outline-none text-white"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onBlur={() => setIsEditingTitle(false)}
@@ -67,7 +68,8 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
             />
           ) : (
             <h1 
-              className="text-xl md:text-4xl lg:text-5xl font-black text-white cursor-pointer hover:text-blue-400 transition-colors whitespace-nowrap overflow-hidden text-ellipsis"
+              // 텍스트 크기 약 10% 확대 (text-xl -> text-2xl, text-5xl -> text-6xl 등)
+              className="text-2xl md:text-5xl lg:text-6xl font-black text-white cursor-pointer hover:text-blue-400 transition-colors whitespace-nowrap overflow-hidden text-ellipsis tracking-tighter"
               onClick={() => setIsEditingTitle(true)}
             >
               {title}
@@ -75,12 +77,12 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
           )}
         </div>
 
-        {/* 1단 우측: 날짜와 시간 */}
+        {/* 1단 우측: 날짜와 시간 (폰트 크기 확대) */}
         <div className="flex flex-col text-right leading-tight shrink-0">
-          <span className="text-blue-400 text-[10px] md:text-sm font-bold whitespace-nowrap">
+          <span className="text-blue-400 text-[11px] md:text-base font-bold whitespace-nowrap">
             {formatDate(currentTime)}
           </span>
-          <span className="text-blue-400 text-sm md:text-2xl font-black tracking-tight whitespace-nowrap">
+          <span className="text-blue-400 text-base md:text-3xl font-black tracking-tighter whitespace-nowrap">
             {formatTime(currentTime)}
           </span>
         </div>
@@ -88,8 +90,8 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
 
       {/* 2단: 아이콘(좌) + 위치/날씨(우) */}
       <div className="flex items-center justify-between w-full border-t border-[#3a3a5e]/30 pt-2">
-        {/* 2단 좌측: 모드 버튼 */}
-        <div className="flex items-center space-x-2 md:space-x-3">
+        {/* 2단 좌측: 모드 버튼 (아이콘 크기 약 10% 확대) */}
+        <div className="flex items-center space-x-2 md:space-x-4">
           {[
             { mode: AppMode.CALENDAR, Icon: Calendar },
             { mode: AppMode.MEMBER, Icon: Users },
@@ -105,38 +107,39 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
                   setMode(m);
                 }
               }}
-              className={`p-1.5 md:p-3 rounded-xl flex items-center justify-center transition-all ${mode === m ? 'bg-blue-600 scale-105 shadow-lg shadow-blue-900' : 'bg-[#2c2c2e] hover:bg-[#3a3a5e]'}`}
+              className={`p-2 md:p-3.5 rounded-xl flex items-center justify-center transition-all ${mode === m ? 'bg-blue-600 scale-105 shadow-lg shadow-blue-900' : 'bg-[#2c2c2e] hover:bg-[#3a3a5e]'}`}
             >
+              {/* 아이콘 크기 확대 (w-5 -> w-6, w-8 -> w-9) */}
               <Icon 
-                className={`w-5 h-5 md:w-8 md:h-8 ${m === AppMode.YOUTUBE ? 'text-[#FF0000]' : 'text-white'}`} 
+                className={`w-6 h-6 md:w-9 md:h-9 ${m === AppMode.YOUTUBE ? 'text-[#FF0000]' : 'text-white'}`} 
               />
             </button>
           ))}
         </div>
 
-        {/* 2단 우측: 위치 및 날씨 정보 */}
+        {/* 2단 우측: 위치 및 날씨 정보 (텍스트 크기 확대) */}
         <div className="flex flex-col text-right leading-tight shrink-0">
           {isLoadingWeather ? (
             <div className="animate-pulse flex flex-col items-end space-y-1">
-              <div className="h-2 bg-[#2c2c2e] rounded w-16"></div>
-              <div className="h-3 bg-[#2c2c2e] rounded w-20"></div>
+              <div className="h-2.5 bg-[#2c2c2e] rounded w-16"></div>
+              <div className="h-4 bg-[#2c2c2e] rounded w-20"></div>
             </div>
           ) : weather ? (
             <>
-              <div className="flex items-center justify-end text-blue-400 text-[10px] md:text-xs font-bold whitespace-nowrap space-x-1">
+              <div className="flex items-center justify-end text-blue-400 text-[11px] md:text-sm font-bold whitespace-nowrap space-x-1">
                 <span className="text-blue-500">{weather.minTemp}°</span>
                 <span className="text-gray-500">/</span>
                 <span className="text-rose-500">{weather.maxTemp}°</span>
-                <MapPin className="w-3 h-3 ml-1 text-blue-500" />
+                <MapPin className="w-3.5 h-3.5 ml-1 text-blue-500" />
                 <span>{weather.location}</span>
               </div>
-              <div className="flex items-center justify-end text-emerald-400 text-xs md:text-xl font-black tracking-tight whitespace-nowrap">
-                <CloudSun className="w-4 h-4 mr-1" />
+              <div className="flex items-center justify-end text-emerald-400 text-sm md:text-2xl font-black tracking-tighter whitespace-nowrap">
+                <CloudSun className="w-5 h-5 md:w-7 md:h-7 mr-1.5" />
                 <span>{weather.temp}°C {weather.condition}</span>
               </div>
             </>
           ) : (
-            <span className="text-gray-600 text-[10px]">연동 대기</span>
+            <span className="text-gray-600 text-[11px]">연동 대기</span>
           )}
         </div>
       </div>
