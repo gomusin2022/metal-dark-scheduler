@@ -1,66 +1,74 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Plus, Search, Trash2, Save, Eraser, FileText, 
-  ChevronRight, Calendar, Clock, StickyNote, SendHorizontal
-} from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { FileDown, FileUp, Save, Trash2, Edit2, X, Check, Eraser } from 'lucide-react';
 import { format } from 'date-fns';
-import { Note } from '../../types';
+import * as XLSX from 'xlsx';
+
+interface Note {
+  id: string;
+  content: string;
+  createdAt: string;
+}
 
 interface NoteViewProps {
   notes: Note[];
   setNotes: React.Dispatch<React.SetStateAction<Note[]>>;
+  noteTitle: string;
+  setNoteTitle: (title: string) => void;
 }
 
-const NoteView: React.FC<NoteViewProps> = ({ notes, setNotes }) => {
-  const [activeNoteId, setActiveNoteId] = useState<string | null>(notes[0]?.id || null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [noteTitle, setNoteTitle] = useState('노트 관리');
+const NoteView: React.FC<NoteViewProps> = ({ notes, setNotes, noteTitle, setNoteTitle }) => {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editBuffer, setEditBuffer] = useState('');
+  const [newInput, setNewInput] = useState('');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const activeNote = notes.find(n => n.id === activeNoteId) || null;
+  const onExport = () => {
+    if (notes.length === 0) return;
+    const name = window.prompt("파일명 입력", `${noteTitle}_${format(new Date(), 'yyyyMMdd')}`);
+    if (name) {
+      const ws = XLSX.utils.json_to_sheet(notes.map(n => ({ '시간': n.createdAt, '내용': n.content })));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Notes");
+      XLSX.writeFile(wb, `${name}.xlsx`);
+    }
+  };
 
-  const addNote = () => {
-    const newNote: Note = {
-      id: crypto.randomUUID(),
-      title: '새로운 메모',
-      content: '',
-      category: '일반',
-      updatedAt: new Date().toISOString()
+  const onImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = (ev) => {
+      const data = XLSX.read(ev.target?.result, { type: 'binary' });
+      const rows = XLSX.utils.sheet_to_json(data.Sheets[data.SheetNames[0]]) as any[];
+      setNotes(prev => [...rows.map(r => ({ 
+        id: crypto.randomUUID(), 
+        content: String(r['내용'] || ''), 
+        createdAt: String(r['시간'] || format(new Date(), 'yyyy-MM-dd HH:mm:ss')) 
+      })), ...prev]);
     };
+    r.readAsBinaryString(f);
+    e.target.value = '';
+  };
+
+  const autoResize = (target: HTMLTextAreaElement) => {
+    target.style.height = 'auto';
+    target.style.height = `${target.scrollHeight}px`;
+  };
+
+  const handleSave = () => {
+    if (!newInput.trim()) return;
+    const timeStamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+    const contentWithTime = `[${timeStamp}]\n${newInput}`;
+    const newNote: Note = { id: crypto.randomUUID(), content: contentWithTime, createdAt: timeStamp };
     setNotes([newNote, ...notes]);
-    setActiveNoteId(newNote.id);
+    setNewInput('');
   };
-
-  const updateNoteContent = (content: string) => {
-    if (!activeNoteId) return;
-    setNotes(notes.map(n => n.id === activeNoteId ? 
-      { ...n, content, updatedAt: new Date().toISOString() } : n));
-  };
-
-  const deleteNote = (id: string) => {
-    if (window.confirm("이 노트를 삭제하시겠습니까?")) {
-      const updatedNotes = notes.filter(n => n.id !== id);
-      setNotes(updatedNotes);
-      if (activeNoteId === id) setActiveNoteId(updatedNotes[0]?.id || null);
-    }
-  };
-
-  const clearContent = () => {
-    if (window.confirm("내용을 모두 비우시겠습니까?")) {
-      updateNoteContent('');
-    }
-  };
-
-  const filteredNotes = notes.filter(n => 
-    n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    n.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
-    // 회원 관리 모드와 동일한 패딩(p-1.5 md:p-6 pt-1) 적용
-    <div className="flex flex-col h-full bg-[#121212] p-1.5 md:p-6 pt-1 text-gray-200">
+    <div className="flex flex-col h-full bg-[#121212] p-1.5 md:p-6 pt-1 text-gray-200 overflow-hidden">
       
-      {/* 상단 타이틀바 (회원 관리 모드와 규격 일치) */}
+      {/* 상단 타이틀바: 회원 관리 모드 규격과 100% 일치 */}
       <div className="flex flex-col w-full mb-1.5">
         <div className="flex items-center justify-between w-full h-9">
           <div className="flex-1 overflow-hidden">
@@ -83,89 +91,71 @@ const NoteView: React.FC<NoteViewProps> = ({ notes, setNotes }) => {
             )}
           </div>
           
-          {/* 우측 조작 아이콘 (회원 모드와 크기 및 간격 일치) */}
           <div className="flex bg-[#1a1a2e] p-0.5 rounded-lg border border-[#3a3a5e] shadow-lg shrink-0 scale-90 origin-right">
-            <button onClick={addNote} className="p-1 text-blue-500 hover:bg-[#2c2c2e] rounded transition-colors">
-              <Plus className="w-5 h-5" />
+            <button onClick={onExport} className="p-1 text-emerald-400 hover:bg-[#2c2c2e] rounded transition-colors" title="엑셀 내보내기">
+              <FileDown className="w-5 h-5" />
             </button>
-            <button className="p-1 text-emerald-400 hover:bg-[#2c2c2e] rounded transition-colors">
-              <Search className="w-5 h-5" />
+            <button onClick={() => fileRef.current?.click()} className="p-1 text-blue-400 hover:bg-[#2c2c2e] rounded transition-colors" title="엑셀 가져오기">
+              <FileUp className="w-5 h-5" />
             </button>
-            <button onClick={() => activeNoteId && deleteNote(activeNoteId)} className="p-1 text-red-500 hover:bg-[#2c2c2e] rounded transition-colors">
-              <Trash2 className="w-5 h-5" />
-            </button>
+            <input type="file" ref={fileRef} onChange={onImport} className="hidden" accept=".xlsx,.xls" />
           </div>
         </div>
       </div>
 
-      <div className="flex flex-1 gap-2 overflow-hidden border-t border-[#3a3a5e]/20 pt-1">
-        {/* 사이드바: 노트 목록 */}
-        <div className="w-1/3 md:w-1/4 flex flex-col gap-1.5 overflow-y-auto pr-1 border-r border-[#3a3a5e]/30">
-          {filteredNotes.map(note => (
-            <div 
-              key={note.id}
-              onClick={() => setActiveNoteId(note.id)}
-              className={`p-2 rounded-lg cursor-pointer transition-all border ${
-                activeNoteId === note.id 
-                  ? 'bg-blue-600/20 border-blue-500/50' 
-                  : 'bg-[#1a1a2e] border-[#3a3a5e] hover:border-gray-500'
-              }`}
-            >
-              <h3 className="text-[10px] md:text-sm font-black text-white truncate mb-0.5">{note.title}</h3>
-              <p className="text-[8px] md:text-xs text-gray-500 truncate">{note.content || '내용 없음'}</p>
-            </div>
-          ))}
+      <div className="flex-grow overflow-y-auto space-y-4 px-1 mt-2 custom-scrollbar">
+        {/* 신규 입력 섹션: 기록/비움 버튼 40% 축소 적용 */}
+        <div className="flex items-start gap-3 w-full bg-[#252535] border border-gray-700 rounded-2xl p-4 shadow-inner">
+          <div className="flex-grow">
+            <textarea 
+              className="w-full bg-transparent p-1 text-lg md:text-2xl font-bold outline-none text-white placeholder-gray-600 overflow-hidden resize-none"
+              placeholder="메모를 입력하세요..." 
+              value={newInput} 
+              onChange={(e) => { setNewInput(e.target.value); autoResize(e.target); }}
+            />
+          </div>
+          <div className="flex flex-col gap-2 shrink-0">
+            {/* 기존 w-24에서 40% 축소된 콤팩트 버튼 */}
+            <button onClick={handleSave} className="w-14 h-14 bg-emerald-600 text-white rounded-xl font-black shadow-lg active:scale-95 flex flex-col items-center justify-center transition-all">
+              <Save className="w-5 h-5" />
+              <span className="text-[10px]">기록</span>
+            </button>
+            <button onClick={() => setNewInput('')} className="w-14 h-8 bg-gray-800 text-gray-500 rounded-lg font-bold text-[10px] flex items-center justify-center">
+              <Eraser className="w-3.5 h-3.5 mr-1" /> 비움
+            </button>
+          </div>
         </div>
 
-        {/* 메인: 노트 입력란 */}
-        <div className="flex-1 flex flex-col bg-[#1a1a2e] rounded-lg border border-[#3a3a5e] relative overflow-hidden">
-          {activeNote ? (
-            <>
-              <div className="flex items-center justify-between p-2 border-b border-[#3a3a5e]/50 bg-[#252545]/30">
-                <input 
-                  className="bg-transparent text-sm md:text-base font-black text-blue-400 outline-none w-full"
-                  value={activeNote.title}
-                  onChange={(e) => setNotes(notes.map(n => n.id === activeNoteId ? { ...n, title: e.target.value } : n))}
+        {/* 기존 데이터 리스트: 버튼 부피 축소 및 레이아웃 정돈 */}
+        {notes.map(note => (
+          <div key={note.id} className="flex items-start gap-3 w-full bg-[#1a1a2e] border border-gray-800 rounded-2xl p-4 shadow-lg transition-all">
+            <div className="flex-grow min-h-[40px] cursor-text" onClick={() => { setEditingId(note.id); setEditBuffer(note.content); }}>
+              {editingId === note.id ? (
+                <textarea 
+                  autoFocus 
+                  className="w-full bg-black text-white p-2 outline-none border-2 border-blue-600 rounded-lg font-bold text-lg md:text-xl overflow-hidden resize-none"
+                  value={editBuffer} 
+                  onChange={(e) => { setEditBuffer(e.target.value); autoResize(e.target); }}
+                  onFocus={(e) => autoResize(e.target)}
                 />
-                
-                {/* 입력란 내부 아이콘: 40% 축소 (w-5 -> w-3) */}
-                <div className="flex gap-1 items-center shrink-0">
-                  <button 
-                    onClick={() => alert('저장되었습니다.')}
-                    className="p-1 text-emerald-500 hover:bg-[#2c2c2e] rounded transition-all"
-                    title="기록"
-                  >
-                    <Save className="w-3 h-3" /> {/* 기존 5에서 3으로 축소 */}
-                  </button>
-                  <button 
-                    onClick={clearContent}
-                    className="p-1 text-orange-500 hover:bg-[#2c2c2e] rounded transition-all"
-                    title="비움"
-                  >
-                    <Eraser className="w-3 h-3" /> {/* 기존 5에서 3으로 축소 */}
-                  </button>
-                </div>
-              </div>
-              <textarea 
-                className="flex-1 p-3 bg-transparent text-gray-200 text-xs md:text-sm outline-none resize-none leading-relaxed"
-                placeholder="내용을 입력하세요..."
-                value={activeNote.content}
-                onChange={(e) => updateNoteContent(e.target.value)}
-              />
-              <div className="p-1.5 px-3 border-t border-[#3a3a5e]/30 flex justify-between items-center bg-[#121212]/50">
-                <span className="text-[9px] text-gray-600 font-bold tracking-tighter">
-                  마지막 수정: {format(new Date(activeNote.updatedAt), 'yyyy-MM-dd HH:mm')}
-                </span>
-                <SendHorizontal className="w-3.5 h-3.5 text-blue-500 opacity-50" />
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-gray-600">
-              <StickyNote className="w-12 h-12 mb-2 opacity-20" />
-              <p className="text-sm font-black">선택된 노트가 없습니다.</p>
+              ) : (
+                <div className="text-lg md:text-2xl font-bold whitespace-pre-wrap text-gray-300 leading-tight tracking-tight">{note.content}</div>
+              )}
             </div>
-          )}
-        </div>
+
+            <div className="flex flex-col gap-1.5 shrink-0">
+              <button onClick={() => { if(editingId === note.id) { setNotes(notes.map(n => n.id === note.id ? {...n, content: editBuffer} : n)); setEditingId(null); } else { setEditingId(note.id); setEditBuffer(note.content); } }} className="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-md active:scale-95">
+                <Check className="w-5 h-5" />
+              </button>
+              <button onClick={() => { setEditingId(note.id); setEditBuffer(note.content); }} className="w-10 h-10 bg-gray-700 text-white rounded-lg flex items-center justify-center hover:bg-gray-600">
+                <Edit2 className="w-4 h-4" />
+              </button>
+              <button onClick={() => { if(window.confirm("삭제하시겠습니까?")) setNotes(notes.filter(n => n.id !== note.id)) }} className="w-10 h-10 bg-red-900/50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-800">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
