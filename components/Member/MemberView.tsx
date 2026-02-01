@@ -25,7 +25,6 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // 전화번호 자동 이동을 위한 Ref
   const phoneMidRef = useRef<HTMLInputElement>(null);
   const phoneEndRef = useRef<HTMLInputElement>(null);
 
@@ -59,7 +58,6 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
     });
   }, [members, sortCriteria]);
 
-  // 전화번호 정규화 (중복 체크 및 데이터 정제용)
   const normalizeTo8Digits = (phone: string) => {
     return (phone || '').replace(/\D/g, '').slice(-8);
   };
@@ -73,7 +71,6 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
     return '010--';
   };
 
-  // 1. 전화번호 입력란 공백 제거 반영 및 입력 로직 수정
   const handlePhoneChange = (id: string, part: 'mid' | 'end', value: string, currentPhone: string) => {
     const digits = value.replace(/\s/g, '').replace(/\D/g, '').slice(0, 4);
     const parts = (currentPhone || '010--').split('-');
@@ -155,7 +152,6 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
     setEditingId(newMember.id);
   };
 
-  // 3. 지우기 버튼 클릭 시 선택된 회원들만 삭제하도록 수정
   const handleClearAll = () => {
     if (selectedIds.size === 0) {
       alert("삭제할 회원을 먼저 선택해 주세요.");
@@ -168,12 +164,31 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
     }
   };
 
+  // 단체 문자 발송 기능 구현
   const handleSendSMS = () => {
     if (selectedIds.size === 0) {
       alert("문자를 발송할 회원을 먼저 선택해 주세요.");
       return;
     }
-    alert(`${selectedIds.size}명에게 단체 문자 발송을 시작합니다.`);
+
+    const selectedMembers = members.filter(m => selectedIds.has(m.id));
+    const phoneNumbers = selectedMembers
+      .map(m => m.phone.replace(/-/g, '')) // 하이픈 제거
+      .filter(phone => phone.length >= 10); // 유효한 번호만 필터링
+
+    if (phoneNumbers.length === 0) {
+      alert("선택된 회원 중 유효한 전화번호가 없습니다.");
+      return;
+    }
+
+    // iOS와 Android 기기별 SMS 구분자 처리
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const separator = isIOS ? ';' : ',';
+    const smsUrl = `sms:${phoneNumbers.join(separator)}`;
+
+    if (window.confirm(`${phoneNumbers.length}명에게 단체 문자를 발송하시겠습니까?`)) {
+      window.location.href = smsUrl;
+    }
   };
 
   const updateMember = (id: string, field: keyof Member, value: any) => {
@@ -202,7 +217,6 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
     { label: '출결', key: 'attendance' },
   ];
 
-  // 2. 선택된 회원 수 정합성을 위해 실제 members에 존재하는 ID만 필터링한 값 계산
   const actualSelectedCount = useMemo(() => {
     const memberIds = new Set(members.map(m => m.id));
     let count = 0;
@@ -248,7 +262,7 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={handleSendSMS} className="p-1.5 bg-orange-600/20 border border-orange-500/50 rounded text-orange-400 transition-transform active:scale-95 shadow-sm"><SendHorizontal className="w-5 h-5" /></button>
+            <button onClick={handleSendSMS} title="단체 문자 발송" className="p-1.5 bg-orange-600/20 border border-orange-500/50 rounded text-orange-400 transition-transform active:scale-95 shadow-sm"><SendHorizontal className="w-5 h-5" /></button>
             <div className="flex items-center bg-[#1a1a2e] px-3 py-1.5 rounded border border-[#3a3a5e] font-black text-sm md:text-lg shadow-inner">
               <span className="text-blue-400">선택 {actualSelectedCount}</span>
               <span className="text-gray-700 mx-2">|</span>
