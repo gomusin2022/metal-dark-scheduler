@@ -16,15 +16,15 @@ import NoteView from './components/Note/NoteView';
 
 const App: React.FC = () => {
   // --- [1. 시스템 설정 및 타이틀 상태] ---
-  // 수정: 초기값을 'Metal Blue WorkScpace'로 변경
   const [mode, setMode] = useState<AppMode>(AppMode.CALENDAR);
-  const [appTitle, setAppTitle] = useState('Metal Blue WorkScpace'); // 메인 헤더 타이틀
-  const [noteTitle, setNoteTitle] = useState('Standard Note'); // 노트 모듈 개별 타이틀
+  // 초기값을 교정된 스펠링으로 설정
+  const [appTitle, setAppTitle] = useState('Metal Blue WorkSpace'); 
+  const [noteTitle, setNoteTitle] = useState('Standard Note'); 
 
   // --- [2. 도메인 데이터 상태] ---
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [notes, setNotes] = useState<Note[]>([]); // 누적 기록용 노트 데이터
+  const [notes, setNotes] = useState<Note[]>([]); 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // --- [3. 초기 데이터 로드 (Local Storage)] ---
@@ -39,11 +39,13 @@ const App: React.FC = () => {
     if (savedMembers) setMembers(JSON.parse(savedMembers));
     if (savedNotes) setNotes(JSON.parse(savedNotes));
     
-    // 수정: 저장된 값이 'Smart Workspace'이거나 없을 경우 새 타이틀 적용
-    if (savedAppTitle && savedAppTitle !== 'Smart Workspace') {
+    // 로컬 스토리지에 저장된 값이 구버전(Smart Workspace 등)이면 새 타이틀로 강제 업데이트
+    const newTitle = 'Metal Blue WorkSpace';
+    if (savedAppTitle && savedAppTitle !== 'Smart Workspace' && savedAppTitle !== 'Metal Blue WorkScpace') {
       setAppTitle(savedAppTitle);
     } else {
-      setAppTitle('Metal Blue WorkScpace');
+      setAppTitle(newTitle);
+      localStorage.setItem('app_main_title', newTitle); // 로컬 스토리지도 즉시 갱신
     }
     
     if (savedNoteTitle) setNoteTitle(savedNoteTitle);
