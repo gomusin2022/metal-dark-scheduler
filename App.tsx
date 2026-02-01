@@ -1,5 +1,5 @@
 /**
- * App.tsx - 메인 컨트롤러 (누락 방지 및 레이아웃 최적화 완전판)
+ * App.tsx - 메인 컨트롤러 (구조 최적화 및 전체 로직 포함판)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -102,7 +102,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] flex flex-col transition-colors duration-500 text-gray-200 overflow-x-hidden">
+    <div className="min-h-screen bg-[#121212] flex flex-col transition-colors duration-500 text-gray-200 overflow-hidden">
       <Header 
         mode={mode} 
         setMode={setMode} 
@@ -110,14 +110,11 @@ const App: React.FC = () => {
         setTitle={setAppTitle} 
       />
       
-      {/* 메인 영역 수정: 
-          1. flex justify-center를 통해 자식 요소가 항상 중앙에 위치하도록 강제.
-          2. px-2 패딩으로 보더가 화면 끝에 닿아 잘리는 것을 방지.
+      {/* 핵심 수정: main에 p-1을 주어 자식의 border-4가 잘리지 않을 공간을 확보함.
+        justify-center와 items-stretch로 자식이 꽉 차면서도 정중앙에 위치하게 함.
       */}
-      <main className="flex-grow relative px-2 py-1 flex justify-center items-start overflow-x-hidden">
-        <div className="w-full h-full max-w-full">
-          {renderContent()}
-        </div>
+      <main className="flex-grow relative p-1 flex justify-center items-stretch overflow-hidden">
+        {renderContent()}
       </main>
     </div>
   );
