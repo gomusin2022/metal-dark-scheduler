@@ -185,10 +185,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
 
       <div className="flex-grow overflow-auto bg-[#1a1a2e] rounded-lg border border-[#3a3a5e] mx-0 mb-1.5 md:mb-6">
         <div className="grid grid-cols-7 gap-px md:gap-1 bg-[#252545] min-h-full">
+          {/* 요일 글씨 크기 40% 확대 적용 (text-[10px]->[14px], md:text-sm->md:text-[1.2rem]) */}
           {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
             <div 
               key={day} 
-              className="text-center font-black py-1.5 md:py-2 text-[10px] md:text-sm bg-[#1a1a2e]" 
+              className="text-center font-black py-1.5 md:py-2 text-[14px] md:text-[1.2rem] bg-[#1a1a2e]" 
               style={{ color: idx === 0 ? COLORS.SUNDAY : idx === 6 ? COLORS.SATURDAY : '#6b7280' }}
             >
               {day}
@@ -264,8 +265,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
         </div>
       </div>
 
-      {/* [하단 개발자 정보 문구 추가] */}
-      <div className="pb-4 text-center text-blue-500/80 text-[10px] md:text-sm font-bold tracking-tight">
+      {/* 최하단 문구 글씨 크기 40% 확대 적용 (text-[10px]->[14px], md:text-sm->md:text-[1.2rem]) */}
+      <div className="pb-4 text-center text-blue-500/80 text-[14px] md:text-[1.2rem] font-bold tracking-tight">
         This app was developed by Yongkyu Kim in January 2026
       </div>
 
