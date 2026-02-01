@@ -127,12 +127,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
   };
 
   return (
-    /* 최종 레이아웃 교정:
-       1. m-0 & w-full: 외부 마진을 제거하고 부모의 너비를 100% 사용함.
-       2. box-border: 테두리(4px)가 전체 너비 100%를 넘지 않도록 박스 모델을 고정함.
-       3. px-[12px]: 테두리(4px) + 패딩(12px) = 16px. 헤더의 p-4와 시작 지점을 일치시킴.
+    /* 최종 레이아웃 교정 포인트:
+       1. w-full & m-0: MemberView와 동일하게 너비 제약 해제
+       2. px-3: 보더 4px + 패딩 12px = 총 16px로 Header(p-4)와 타이틀 시작선 일치
+       3. box-border: 테두리 두께가 100% 너비를 넘지 않도록 고정
     */
-    <div className={`flex flex-col h-full bg-[#121212] px-[12px] pt-0 pb-4 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] w-full m-0 box-border
+    <div className={`flex flex-col h-full bg-[#121212] px-3 pt-0 pb-4 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] w-full m-0 box-border
       ${mode === 'copy' ? 'border-blue-500/20' : 
         mode === 'delete' ? 'border-rose-500/20' : 'border-transparent'}`}
     >
@@ -178,7 +178,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
         </div>
       </div>
 
-      <div className="flex-grow grid grid-cols-7 gap-1 md:gap-2 overflow-auto mt-2">
+      <div className="flex-grow grid grid-cols-7 gap-1 md:gap-2 overflow-auto">
         {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
           <div key={day} className="text-center font-black py-0.5 text-[10px] md:text-sm" style={{ color: idx === 0 ? COLORS.SUNDAY : idx === 6 ? COLORS.SATURDAY : '#6b7280' }}>{day}</div>
         ))}
