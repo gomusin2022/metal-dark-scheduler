@@ -127,14 +127,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
   };
 
   return (
-    /* 핵심 수정 사항:
-      1. px-3 적용: border-4(4px) + px-3(12px) = 총 16px로 Header의 p-4와 수직 정렬을 완벽하게 일치시킴.
-      2. w-full & box-border: 테두리가 화면 밖으로 나가지 않고 정확히 100%를 유지하도록 설정.
-      3. rounded-t-none: 헤더와 맞닿는 윗부분의 곡률을 제거하여 시각적인 너비 단절감을 해결 (선택 사항이나 권장).
+    /* 최종 레이아웃 교정:
+       1. m-0 & w-full: 외부 마진을 제거하고 부모의 너비를 100% 사용함.
+       2. box-border: 테두리(4px)가 전체 너비 100%를 넘지 않도록 박스 모델을 고정함.
+       3. px-[12px]: 테두리(4px) + 패딩(12px) = 16px. 헤더의 p-4와 시작 지점을 일치시킴.
     */
-    <div className={`flex flex-col h-full bg-[#121212] px-3 pt-2 pb-4 text-gray-200 transition-all duration-500 border-4 rounded-b-[2rem] w-full box-border
+    <div className={`flex flex-col h-full bg-[#121212] px-[12px] pt-0 pb-4 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] w-full m-0 box-border
       ${mode === 'copy' ? 'border-blue-500/20' : 
-        mode === 'delete' ? 'border-rose-500/20' : 'border-[#1a1a2e]'}`}
+        mode === 'delete' ? 'border-rose-500/20' : 'border-transparent'}`}
     >
       <div className="flex flex-col w-full mb-1">
         <div className="flex items-center justify-between w-full h-10">
@@ -178,7 +178,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
         </div>
       </div>
 
-      <div className="flex-grow grid grid-cols-7 gap-1 md:gap-2 overflow-auto">
+      <div className="flex-grow grid grid-cols-7 gap-1 md:gap-2 overflow-auto mt-2">
         {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
           <div key={day} className="text-center font-black py-0.5 text-[10px] md:text-sm" style={{ color: idx === 0 ? COLORS.SUNDAY : idx === 6 ? COLORS.SATURDAY : '#6b7280' }}>{day}</div>
         ))}
