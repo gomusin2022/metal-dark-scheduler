@@ -128,10 +128,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
 
   return (
     <div className="flex flex-col h-full bg-[#121212] text-gray-200 w-full">
-      {/* 헤더 영역과 동일한 좌우 패딩(또는 0)으로 맞춤 */}
-      <div className="flex flex-col w-full mb-1 px-1.5 md:px-6">
+      {/* 수정: 좌우 패딩을 0으로 설정 */}
+      <div className="flex flex-col w-full mb-1 px-0">
 
-        <div className="flex items-center justify-between w-full h-10">
+        <div className="flex items-center justify-between w-full h-10 px-1.5 md:px-6">
           <div className="flex-1 overflow-hidden">
             {isEditingTitle ? (
               <input 
@@ -165,7 +165,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
           </div>
         </div>
 
-        <div className="flex items-center justify-between w-full h-12 border-t border-[#3a3a5e]/20 pt-1.5">
+        <div className="flex items-center justify-between w-full h-12 border-t border-[#3a3a5e]/20 pt-1.5 px-1.5 md:px-6">
           <div className="flex items-center bg-[#1a1a2e] rounded p-0.5 border border-[#3a3a5e] shadow-md">
             <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1.5 hover:bg-[#2c2c2e] rounded"><ChevronLeft className="w-6 h-6 text-blue-400" /></button>
             <span className="text-xl md:text-3xl font-black px-4 min-w-[120px] md:min-w-[180px] text-center text-white tabular-nums">
@@ -184,8 +184,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
         </div>
       </div>
 
-      {/* 달력 본문 - 좌우 패딩 최소화 & w-full 강제 */}
-      <div className="flex-grow overflow-auto bg-[#1a1a2e] rounded-lg border border-[#3a3a5e] mx-1.5 md:mx-6 mb-1.5 md:mb-6">
+      {/* 수정: 달력 본문 좌우 마진을 0으로 설정 */}
+      <div className="flex-grow overflow-auto bg-[#1a1a2e] rounded-lg border border-[#3a3a5e] mx-0 mb-1.5 md:mb-6">
         <div className="grid grid-cols-7 gap-px md:gap-1 bg-[#252545] min-h-full">
           {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
             <div 
