@@ -127,19 +127,18 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
   };
 
   return (
-    /* 최종 레이아웃 수정:
-      1. w-full: 부모 영역을 가득 채움
-      2. px-4: Header의 p-4(16px)와 동일한 좌우 여백 적용 (수직 정렬 일치)
-      3. mx-0: 중앙 정렬 마진 제거
-      4. rounded-[2rem] 및 border-4 유지하여 디자인 정체성 보존
+    /* 핵심 수정 사항:
+      1. px-3 적용: border-4(4px) + px-3(12px) = 총 16px로 Header의 p-4와 수직 정렬을 완벽하게 일치시킴.
+      2. w-full & box-border: 테두리가 화면 밖으로 나가지 않고 정확히 100%를 유지하도록 설정.
+      3. rounded-t-none: 헤더와 맞닿는 윗부분의 곡률을 제거하여 시각적인 너비 단절감을 해결 (선택 사항이나 권장).
     */
-    <div className={`flex flex-col h-full bg-[#121212] px-4 pt-0 pb-4 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] w-full mx-0
+    <div className={`flex flex-col h-full bg-[#121212] px-3 pt-2 pb-4 text-gray-200 transition-all duration-500 border-4 rounded-b-[2rem] w-full box-border
       ${mode === 'copy' ? 'border-blue-500/20' : 
-        mode === 'delete' ? 'border-rose-500/20' : 'border-transparent'}`}
+        mode === 'delete' ? 'border-rose-500/20' : 'border-[#1a1a2e]'}`}
     >
       <div className="flex flex-col w-full mb-1">
         <div className="flex items-center justify-between w-full h-10">
-          <div className="flex-1 flex justify-start">
+          <div className="flex-1 flex justify-start pr-2 overflow-hidden">
             {isEditingTitle ? (
               <input autoFocus className="bg-[#2c2c2e] border border-blue-500 rounded px-1.5 py-0.5 text-base font-black text-white outline-none w-fit max-w-xs" value={calendarTitle} onChange={(e) => setCalendarTitle(e.target.value)} onBlur={() => setIsEditingTitle(false)} onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)} />
             ) : (
