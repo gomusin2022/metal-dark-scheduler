@@ -1,5 +1,5 @@
 /**
- * App.tsx - 메인 컨트롤러 (구조 최적화 및 전체 로직 포함판)
+ * App.tsx - 메인 컨트롤러 (좌측 잘림 방지 수정판)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -102,7 +102,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] flex flex-col transition-colors duration-500 text-gray-200 overflow-hidden">
+    /* 최상단 컨테이너에서 overflow-hidden을 제거하여 보더 잘림 현상을 방지합니다. */
+    <div className="min-h-screen bg-[#121212] flex flex-col transition-colors duration-500 text-gray-200">
       <Header 
         mode={mode} 
         setMode={setMode} 
@@ -110,10 +111,10 @@ const App: React.FC = () => {
         setTitle={setAppTitle} 
       />
       
-      {/* 핵심 수정: main에 p-1을 주어 자식의 border-4가 잘리지 않을 공간을 확보함.
-        justify-center와 items-stretch로 자식이 꽉 차면서도 정중앙에 위치하게 함.
+      {/* main 태그의 px-1을 통해 달력의 보더가 화면 끝에 닿아 잘리지 않도록 보호합니다. 
+          overflow-x-hidden을 설정하여 불필요한 가로 스크롤은 방지하면서 세로 공간은 확보합니다.
       */}
-      <main className="flex-grow relative p-1 flex justify-center items-stretch overflow-hidden">
+      <main className="flex-grow relative px-1 py-1 overflow-x-hidden">
         {renderContent()}
       </main>
     </div>
