@@ -198,6 +198,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
           {calendarDays.map((day) => {
             const daySchedules = schedules.filter(s => isSameDay(new Date(s.date), day));
             const isCurrentMonth = isSameMonth(day, monthStart);
+            const isToday = isSameDay(day, new Date());
             const { isRedDay, isSaturday, label } = getDayStatus(day);
             let dayColor = COLORS.TEXT_PRIMARY;
             if (isRedDay) dayColor = COLORS.SUNDAY; else if (isSaturday) dayColor = COLORS.SATURDAY;
@@ -225,8 +226,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
                     ? 'hover:bg-rose-900/30 hover:border-rose-600' 
                     : 'hover:border-blue-500/70 hover:bg-[#252545]'
                   }
-                  ${isSameDay(day, new Date()) 
-                    ? 'ring-2 ring-blue-500/70 shadow-[0_0_12px_rgba(59,130,246,0.3)]' 
+                  ${isToday 
+                    ? 'ring-2 ring-inset ring-blue-500/90 z-10 shadow-[inset_0_0_8px_rgba(59,130,246,0.5)]' 
                     : ''
                   }
                 `}
