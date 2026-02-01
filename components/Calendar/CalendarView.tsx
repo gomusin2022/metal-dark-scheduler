@@ -1,6 +1,3 @@
-/**
- * CalendarView.tsx - 넓은 레이아웃 복구 및 보더 최적화 버전
- */
 import React, { useState, useRef } from 'react';
 import { 
   format, addMonths, subMonths, startOfMonth, endOfMonth, 
@@ -61,6 +58,40 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
     return { isRedDay, isSaturday, label };
   };
 
+  const exportToExcel = () => {
+    const targetMonthStr = format(currentMonth, 'yyyy-MM');
+    const monthlyData = schedules
+      .filter(s => s.date.startsWith(targetMonthStr))
+      .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime))
+      .map(s => ({ 날짜: s.date, 시작시간: s.startTime, 종료시간: s.endTime, 제목: s.title }));
+    if (monthlyData.length === 0) return alert(`${targetMonthStr} 일정이 없습니다.`);
+    const worksheet = XLSX.utils.json_to_sheet(monthlyData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "월간일정");
+    XLSX.writeFile(workbook, `${targetMonthStr}_일정관리.xlsx`);
+  };
+
+  const importFromExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const bstr = evt.target?.result;
+      const wb = XLSX.read(bstr, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws) as any[];
+      const importedSchedules: Schedule[] = data.map(item => ({
+        id: crypto.randomUUID(),
+        date: item.날짜 || item.date,
+        startTime: item.시작시간 || item.startTime || '09:00',
+        endTime: item.종료시간 || item.endTime || '10:00',
+        title: item.제목 || item.title || '새 일정'
+      }));
+      onUpdateSchedules([...schedules, ...importedSchedules]);
+    };
+    reader.readAsBinaryString(file);
+  };
+
   const handleCopyAction = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     const daySchedules = schedules.filter(s => s.date === dateStr);
@@ -86,10 +117,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
   };
 
   return (
-    /* 롤백 포인트: w-full로 가로를 꽉 채우고 mx-0으로 불필요한 마진을 제거 */
-    <div className={`flex flex-col h-full bg-[#121212] px-2 md:px-4 pt-0 pb-2 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] w-full box-border mx-0
-      ${mode === 'copy' ? 'border-blue-500/30' : 
-        mode === 'delete' ? 'border-rose-500/30' : 'border-transparent'}`}
+    /* 롤백 핵심: 너비를 다시 w-full로 복구하고, box-border를 적용하여 보더를 내부로 포함시킴. 
+       모든 비대칭 여백(pl-4, ml-2 등)을 제거하여 화면을 꽉 채움.
+    */
+    <div className={`flex flex-col h-full bg-[#121212] px-2 md:px-4 pt-0 pb-2 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] w-full box-border mx-auto
+      ${mode === 'copy' ? 'border-blue-500/20' : 
+        mode === 'delete' ? 'border-rose-500/20' : 'border-transparent'}`}
     >
       <div className="flex flex-col w-full mb-1">
         <div className="flex items-center justify-between w-full h-10 px-1">
@@ -97,30 +130,33 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
             {isEditingTitle ? (
               <input autoFocus className="bg-[#2c2c2e] border border-blue-500 rounded px-1.5 py-0.5 text-base font-black text-white outline-none w-fit" value={calendarTitle} onChange={(e) => setCalendarTitle(e.target.value)} onBlur={() => setIsEditingTitle(false)} onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)} />
             ) : (
-              <h2 className="text-lg md:text-2xl font-black text-white cursor-pointer tracking-tighter w-fit hover:text-blue-400 transition-colors" onClick={() => setIsEditingTitle(true)}>{calendarTitle}</h2>
+              <h2 className="text-lg md:text-2xl font-black text-white cursor-pointer tracking-tighter w-fit hover:text-blue-400" onClick={() => setIsEditingTitle(true)}>{calendarTitle}</h2>
             )}
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             <div className="flex bg-[#1a1a2e] p-0.5 rounded border border-[#3a3a5e] shadow-lg">
-              <button onClick={() => { setMode('normal'); setClipboard([]); }} className={`p-1.5 rounded transition-all ${mode === 'normal' ? 'bg-blue-600' : 'hover:bg-[#2c2c2e]'}`}><MousePointer2 className="w-5 h-5 text-amber-400" /></button>
-              <button onClick={() => setMode('copy')} className={`p-1.5 rounded transition-all ${mode === 'copy' ? 'bg-blue-600' : 'hover:bg-[#2c2c2e]'}`}><Copy className="w-5 h-5 text-cyan-400" /></button>
-              <button onClick={() => setMode('delete')} className={`p-1.5 rounded transition-all ${mode === 'delete' ? 'bg-blue-600' : 'hover:bg-[#2c2c2e]'}`}><Trash2 className="w-5 h-5 text-rose-500" /></button>
+              <button onClick={() => { setMode('normal'); setClipboard([]); }} className={`p-1.5 rounded ${mode === 'normal' ? 'bg-blue-600' : 'hover:bg-[#2c2c2e]'}`}><MousePointer2 className="w-5 h-5 text-amber-400" /></button>
+              <button onClick={() => setMode('copy')} className={`p-1.5 rounded ${mode === 'copy' ? 'bg-blue-600' : 'hover:bg-[#2c2c2e]'}`}><Copy className="w-5 h-5 text-cyan-400" /></button>
+              <button onClick={() => setMode('delete')} className={`p-1.5 rounded ${mode === 'delete' ? 'bg-blue-600' : 'hover:bg-[#2c2c2e]'}`}><Trash2 className="w-5 h-5 text-rose-500" /></button>
             </div>
-            <button onClick={handleUndo} className="p-1.5 bg-[#1a1a2e] border border-[#3a3a5e] rounded text-emerald-400"><RotateCcw className="w-5 h-5" /></button>
+            <button onClick={handleUndo} className="p-1.5 bg-[#1a1a2e] border border-[#3a3a5e] rounded text-emerald-400 relative"><RotateCcw className="w-5 h-5" />{undoStack.length > 0 && <span className="absolute -top-1 -right-1 bg-emerald-500 text-[8px] px-1 rounded-full text-white">{undoStack.length}</span>}</button>
           </div>
         </div>
 
         <div className="flex items-center justify-between w-full h-12 border-t border-[#3a3a5e]/20 pt-1 px-1">
-          <div className="flex items-center bg-[#1a1a2e] rounded p-0.5 border border-[#3a3a5e]">
+          <div className="flex items-center bg-[#1a1a2e] rounded p-0.5 border border-[#3a3a5e] shadow-md">
             <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1.5 hover:bg-[#2c2c2e] rounded"><ChevronLeft className="w-6 h-6 text-blue-400" /></button>
-            <span className="text-xl md:text-3xl font-black px-4 text-white">{format(currentMonth, 'yyyy. MM', { locale: ko })}</span>
+            <span className="text-xl md:text-3xl font-black px-4 min-w-[120px] text-center text-white tabular-nums">{format(currentMonth, 'yyyy. MM', { locale: ko })}</span>
             <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-1.5 hover:bg-[#2c2c2e] rounded"><ChevronRight className="w-6 h-6 text-blue-400" /></button>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button onClick={exportToExcel} className="p-1.5 bg-emerald-700 border border-emerald-500/50 rounded text-white shadow-sm"><FileDown className="w-5 h-5" /></button>
+            <label className="p-1.5 bg-[#1a1a2e] border border-[#3a3a5e] rounded cursor-pointer hover:bg-[#3a3a5e]"><FileUp className="w-5 h-5 text-emerald-400" /><input type="file" ref={fileInputRef} onChange={importFromExcel} className="hidden" accept=".xlsx, .xls" /></label>
           </div>
         </div>
       </div>
 
-      {/* 그리드 복구: gap을 유지하면서 각 셀이 화면 너비를 가득 채우도록 설정 */}
-      <div className="flex-grow grid grid-cols-7 gap-1 md:gap-2 overflow-auto w-full">
+      <div className="flex-grow grid grid-cols-7 gap-1 md:gap-2 overflow-auto justify-items-stretch w-full">
         {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
           <div key={day} className="text-center font-black py-0.5 text-[10px] md:text-sm" style={{ color: idx === 0 ? COLORS.SUNDAY : idx === 6 ? COLORS.SATURDAY : '#6b7280' }}>{day}</div>
         ))}
@@ -134,27 +170,19 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
 
           return (
             <div key={day.toString()} onClick={() => { if (mode === 'normal') onDateClick(day); else if (mode === 'copy') handleCopyAction(day); else if (mode === 'delete') handleDeleteAction(day); }} 
-                 className={`w-full min-h-[85px] md:min-h-[110px] p-1 md:p-2 rounded border transition-all cursor-pointer flex flex-col relative ${isCurrentMonth ? 'bg-[#1a1a2e] border-[#3a3a5e]' : 'bg-transparent border-transparent opacity-20'} ${mode === 'delete' && daySchedules.length > 0 ? 'hover:bg-rose-900/20 hover:border-rose-500' : 'hover:border-blue-500 hover:bg-[#252545]'} ${isSameDay(day, new Date()) ? 'ring-2 ring-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.2)]' : ''}`}>
-              <div className="flex items-baseline gap-1">
+                 className={`w-full min-h-[85px] md:min-h-[110px] p-1 md:p-2 rounded border transition-all cursor-pointer flex flex-col items-center text-center relative group min-w-0 ${isCurrentMonth ? 'bg-[#1a1a2e] border-[#3a3a5e]' : 'bg-transparent border-transparent opacity-10'} ${mode === 'delete' && daySchedules.length > 0 ? 'hover:bg-rose-900/20 hover:border-rose-500' : 'hover:border-blue-500 hover:bg-[#252545]'} ${isSameDay(day, new Date()) ? 'ring-2 ring-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.2)]' : ''}`}>
+              <div className="flex items-baseline justify-center gap-1 w-full">
                 <span className="text-lg md:text-2xl font-black" style={{ color: dayColor }}>{format(day, 'd')}</span>
-                {isCurrentMonth && label && <span className="text-[7px] md:text-[10px] font-bold truncate" style={{ color: COLORS.SUNDAY }}>{label}</span>}
+                {isCurrentMonth && label && <span className="text-[7px] md:text-[9px] font-bold truncate" style={{ color: COLORS.SUNDAY }}>{label}</span>}
               </div>
-              <div className="mt-1 space-y-1 overflow-hidden">
-                {daySchedules.slice(0, 3).map((s) => (
-                  <div key={s.id} className="w-full text-[8px] md:text-[11px] px-1.5 py-0.5 bg-blue-600/10 text-blue-300 rounded-md truncate font-bold border border-blue-500/10">{s.title}</div>
-                ))}
-                {daySchedules.length > 3 && <div className="text-[8px] text-gray-500 pl-1 font-black">+{daySchedules.length - 3}</div>}
+              <div className="mt-1 space-y-1 w-full flex flex-col items-center overflow-hidden px-0.5">
+                {daySchedules.slice(0, 3).map((s) => (<div key={s.id} className="w-full text-[8px] md:text-[10px] px-1 py-0.5 bg-blue-600/10 text-blue-300 rounded-md truncate font-bold border border-blue-500/10 text-center">{s.title}</div>))}
+                {daySchedules.length > 3 && <div className="text-[8px] text-gray-500 font-black">+{daySchedules.length - 3}</div>}
               </div>
             </div>
           );
         })}
       </div>
-
-      {clipboard.length > 0 && mode === 'copy' && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-blue-600 text-white rounded-full shadow-xl flex items-center gap-2 text-xs font-bold animate-bounce">
-          <ClipboardCheck className="w-4 h-4" /> {clipboard.length}개 복사됨 - 붙여넣을 날짜 클릭
-        </div>
-      )}
     </div>
   );
 };
