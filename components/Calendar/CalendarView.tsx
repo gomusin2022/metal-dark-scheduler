@@ -128,7 +128,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
 
   return (
     <div className="flex flex-col h-full bg-[#121212] text-gray-200 w-full">
-      {/* 수정: 좌우 패딩을 0으로 설정 */}
       <div className="flex flex-col w-full mb-1 px-0">
 
         <div className="flex items-center justify-between w-full h-10 px-1.5 md:px-6">
@@ -154,13 +153,13 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
 
           <div className="flex items-center gap-1.5 shrink-0">
             <div className="flex bg-[#1a1a2e] p-1 rounded border border-[#3a3a5e] shadow-lg">
-              <button onClick={() => { setMode('normal'); setClipboard([]); }} className={`p-1.5 rounded transition-all ${mode === 'normal' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><MousePointer2 className="w-5 h-5 text-amber-400" /></button>
-              <button onClick={() => setMode('copy')} className={`p-1.5 rounded transition-all ${mode === 'copy' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><Copy className="w-5 h-5 text-cyan-400" /></button>
-              <button onClick={() => setMode('delete')} className={`p-1.5 rounded transition-all ${mode === 'delete' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><Trash2 className="w-5 h-5 text-rose-500" /></button>
+              <button onClick={() => { setMode('normal'); setClipboard([]); }} className={`w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded transition-all ${mode === 'normal' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><MousePointer2 className="w-6 h-6 md:w-9 md:h-9 text-amber-400" /></button>
+              <button onClick={() => setMode('copy')} className={`w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded transition-all ${mode === 'copy' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><Copy className="w-6 h-6 md:w-9 md:h-9 text-cyan-400" /></button>
+              <button onClick={() => setMode('delete')} className={`w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded transition-all ${mode === 'delete' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><Trash2 className="w-6 h-6 md:w-9 md:h-9 text-rose-500" /></button>
             </div>
-            <button onClick={handleUndo} className="p-1.5 bg-[#1a1a2e] border border-[#3a3a5e] rounded text-emerald-400 relative">
-              <RotateCcw className="w-5 h-5" />
-              {undoStack.length > 0 && <span className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-black">{undoStack.length}</span>}
+            <button onClick={handleUndo} className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center bg-[#1a1a2e] border border-[#3a3a5e] rounded text-emerald-400 relative">
+              <RotateCcw className="w-6 h-6 md:w-9 md:h-9" />
+              {undoStack.length > 0 && <span className="absolute top-0.5 right-0.5 bg-emerald-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black">{undoStack.length}</span>}
             </button>
           </div>
         </div>
@@ -175,16 +174,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            <button onClick={exportToExcel} className="p-1.5 bg-emerald-700 border border-emerald-500/50 rounded text-white shadow-sm" title="월간 저장"><FileDown className="w-5 h-5" /></button>
-            <label className="p-1.5 bg-[#1a1a2e] border border-[#3a3a5e] rounded cursor-pointer hover:bg-[#3a3a5e]" title="엑셀 업로드">
-              <FileUp className="w-5 h-5 text-emerald-400" />
+            <button onClick={exportToExcel} className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center bg-emerald-700 border border-emerald-500/50 rounded text-white shadow-sm" title="월간 저장"><FileDown className="w-6 h-6 md:w-9 md:h-9" /></button>
+            <label className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center bg-[#1a1a2e] border border-[#3a3a5e] rounded cursor-pointer hover:bg-[#3a3a5e]" title="엑셀 업로드">
+              <FileUp className="w-6 h-6 md:w-9 md:h-9 text-emerald-400" />
               <input type="file" ref={fileInputRef} onChange={importFromExcel} accept=".xlsx, .xls" className="hidden" />
             </label>
           </div>
         </div>
       </div>
 
-      {/* 수정: 달력 본문 좌우 마진을 0으로 설정 */}
       <div className="flex-grow overflow-auto bg-[#1a1a2e] rounded-lg border border-[#3a3a5e] mx-0 mb-1.5 md:mb-6">
         <div className="grid grid-cols-7 gap-px md:gap-1 bg-[#252545] min-h-full">
           {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
