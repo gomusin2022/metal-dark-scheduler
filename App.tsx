@@ -16,8 +16,9 @@ import NoteView from './components/Note/NoteView';
 
 const App: React.FC = () => {
   // --- [1. 시스템 설정 및 타이틀 상태] ---
+  // 수정: 초기값을 'Metal Blue WorkScpace'로 변경
   const [mode, setMode] = useState<AppMode>(AppMode.CALENDAR);
-  const [appTitle, setAppTitle] = useState('Smart Workspace'); // 메인 헤더 타이틀
+  const [appTitle, setAppTitle] = useState('Metal Blue WorkScpace'); // 메인 헤더 타이틀
   const [noteTitle, setNoteTitle] = useState('Standard Note'); // 노트 모듈 개별 타이틀
 
   // --- [2. 도메인 데이터 상태] ---
@@ -37,7 +38,14 @@ const App: React.FC = () => {
     if (savedSchedules) setSchedules(JSON.parse(savedSchedules));
     if (savedMembers) setMembers(JSON.parse(savedMembers));
     if (savedNotes) setNotes(JSON.parse(savedNotes));
-    if (savedAppTitle) setAppTitle(savedAppTitle);
+    
+    // 수정: 저장된 값이 'Smart Workspace'이거나 없을 경우 새 타이틀 적용
+    if (savedAppTitle && savedAppTitle !== 'Smart Workspace') {
+      setAppTitle(savedAppTitle);
+    } else {
+      setAppTitle('Metal Blue WorkScpace');
+    }
+    
     if (savedNoteTitle) setNoteTitle(savedNoteTitle);
   }, []);
 
