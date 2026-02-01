@@ -127,12 +127,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
   };
 
   return (
-    /* 최종 수정 사항:
-      1. mx-auto: 부모 컨테이너 중앙 정렬
-      2. w-[calc(100%-12px)]: 보더가 부모를 넘지 않도록 너비 강제 조정
-      3. px-3: 내부 일요일/토요일 칸이 보더에 붙지 않도록 균등 여백 부여
+    /* 수정 사항: 
+      1. w-[calc(100%-12px)] 제거 -> w-full 변경 (헤더와 동일한 너비)
+      2. mx-auto 제거 (좌우 꽉 차게 배치)
+      3. border-4 유지 및 모드별 보더 색상 피드백 유지
     */
-    <div className={`flex flex-col h-full bg-[#121212] px-3 md:px-6 pt-0 pb-2 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] mx-auto w-[calc(100%-12px)]
+    <div className={`flex flex-col h-full bg-[#121212] px-3 md:px-6 pt-0 pb-2 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] w-full
       ${mode === 'copy' ? 'border-blue-500/20' : 
         mode === 'delete' ? 'border-rose-500/20' : 'border-transparent'}`}
     >
