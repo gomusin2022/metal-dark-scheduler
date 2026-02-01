@@ -165,17 +165,16 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
         </div>
       )}
 
-      {/* 상단 제어 바 */}
       <div className="flex flex-col w-full mb-1">
         <div className="flex items-center justify-between w-full h-10">
           <div className="flex-1 overflow-hidden">
             {isEditingTitle ? (
-              <input autoFocus className="bg-[#2c2c2e] border border-blue-500 rounded-lg px-1.5 py-0.5 text-base font-black text-white outline-none w-full" value={memberTitle} onChange={(e) => setMemberTitle(e.target.value)} onBlur={() => setIsEditingTitle(false)} onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)} />
+              <input autoFocus className="bg-[#2c2c2e] border border-blue-500 rounded-lg px-1.5 py-0.5 text-base font-black text-white outline-none w-fit max-w-full" value={memberTitle} onChange={(e) => setMemberTitle(e.target.value)} onBlur={() => setIsEditingTitle(false)} onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)} />
             ) : (
-              <h2 className="text-lg md:text-2xl font-black text-white cursor-pointer tracking-tighter truncate" onClick={() => setIsEditingTitle(true)}>{memberTitle}</h2>
+              /* 수정: w-fit 적용 */
+              <h2 className="text-lg md:text-2xl font-black text-white cursor-pointer tracking-tighter truncate w-fit hover:text-blue-400 transition-colors" onClick={() => setIsEditingTitle(true)}>{memberTitle}</h2>
             )}
           </div>
-          {/* 아이콘 버튼 5개: 문자전송버튼 규격(p-1.5, rounded)으로 확대 */}
           <div className="flex bg-[#1a1a2e] p-1 rounded border border-[#3a3a5e] shadow-lg shrink-0 scale-100">
             <button onClick={handleClearAll} className="p-1.5 text-red-500 hover:bg-[#2c2c2e] rounded"><Eraser className="w-5 h-5" /></button>
             <button onClick={addMember} className="p-1.5 text-blue-500 hover:bg-[#2c2c2e] rounded"><UserPlus className="w-5 h-5" /></button>
@@ -185,10 +184,8 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
           </div>
         </div>
 
-        {/* 정렬 및 인원 표시부 */}
         <div className="flex items-center justify-between w-full border-t border-[#3a3a5e]/20 pt-1.5">
           <div className="flex gap-1">
-            {/* 소트 버튼: 크기 확대, 글씨 40% 확대 */}
             {sortButtons.map(btn => (
               <button key={btn.key} onClick={() => handleSortToggle(btn.key)} className={`p-1.5 min-w-[50px] md:min-w-[70px] flex items-center justify-center rounded border text-xs md:text-base font-black transition-all ${sortCriteria.includes(btn.key) ? 'bg-blue-600 border-blue-400 text-white shadow-md' : 'bg-[#1a1a2e] border-[#3a3a5e] text-gray-400'}`}>
                 {btn.label}
@@ -197,7 +194,6 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
           </div>
           <div className="flex items-center gap-2">
             <button onClick={handleSendSMS} className="p-1.5 bg-orange-600/20 border border-orange-500/50 rounded text-orange-400 transition-transform active:scale-95 shadow-sm"><SendHorizontal className="w-5 h-5" /></button>
-            {/* 인원 표시: 글씨 40% 확대 */}
             <div className="flex items-center bg-[#1a1a2e] px-3 py-1.5 rounded border border-[#3a3a5e] font-black text-sm md:text-lg shadow-inner">
               <span className="text-blue-400">선택 {selectedIds.size}</span>
               <span className="text-gray-700 mx-2">|</span>
@@ -207,7 +203,6 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
         </div>
       </div>
 
-      {/* 회원 목록 테이블: 데이터 글씨 20% 확대 */}
       <div className="flex-grow overflow-auto bg-[#1a1a2e] rounded-lg border border-[#3a3a5e]">
         <table className="w-full text-left border-collapse table-fixed min-w-[450px]">
           <thead className="sticky top-0 bg-[#2c2c2e] text-blue-400 font-black text-[11px] md:text-sm z-10">
@@ -251,7 +246,6 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
                       m.address
                     )}
                   </td>
-                  {/* 회비: 기본 유지 / 출석: 노랑 / 가입: 핑크 */}
                   <td className="p-0 text-center"><button onClick={() => updateMember(m.id, 'fee', !m.fee)} className={`p-1 rounded transition-colors ${m.fee ? 'text-emerald-500' : 'text-gray-400/30'}`}><Check className="w-5 h-5" /></button></td>
                   <td className="p-0 text-center"><button onClick={() => updateMember(m.id, 'attendance', !m.attendance)} className={`p-1 rounded transition-colors ${m.attendance ? 'text-amber-500' : 'text-gray-400/30'}`}><Check className="w-5 h-5" /></button></td>
                   <td className="p-0 text-center"><button onClick={() => updateMember(m.id, 'joined', !m.joined)} className={`p-1 rounded transition-colors ${m.joined ? 'text-rose-500' : 'text-gray-400/30'}`}><Check className="w-5 h-5" /></button></td>

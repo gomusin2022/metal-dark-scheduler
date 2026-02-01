@@ -53,21 +53,21 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
   return (
     <header className="sticky top-0 z-50 bg-[#1a1a2e] border-b border-[#3a3a5e] p-4 flex flex-col shadow-2xl transition-all duration-300 gap-3">
       
-      {/* 1단: 타이틀(좌) + 날짜/시간(우) */}
       <div className="flex items-center justify-between w-full">
         <div className="flex-1 flex justify-start pr-2 overflow-hidden">
           {isEditingTitle ? (
             <input
               autoFocus
-              className="bg-[#2c2c2e] border border-blue-500 rounded-lg px-2 py-1 text-2xl md:text-4xl font-black w-full outline-none text-white"
+              className="bg-[#2c2c2e] border border-blue-500 rounded-lg px-2 py-1 text-2xl md:text-4xl font-black w-fit max-w-full outline-none text-white"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onBlur={() => setIsEditingTitle(false)}
               onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
             />
           ) : (
+            /* 수정: w-fit 적용으로 클릭 범위 제한 */
             <h1 
-              className="text-2xl md:text-5xl lg:text-6xl font-black text-white cursor-pointer hover:text-blue-400 transition-colors whitespace-nowrap overflow-hidden text-ellipsis tracking-tighter"
+              className="text-2xl md:text-5xl lg:text-6xl font-black text-white cursor-pointer hover:text-blue-400 transition-colors whitespace-nowrap overflow-hidden text-ellipsis tracking-tighter w-fit"
               onClick={() => setIsEditingTitle(true)}
             >
               {title}
@@ -75,7 +75,6 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
           )}
         </div>
 
-        {/* 1단 우측: 날짜와 시간 (글자 크기 20% 확대 및 위치 고정) */}
         <div className="flex flex-col text-right leading-tight shrink-0 min-w-[140px] md:min-w-[220px]">
           <span className="text-blue-400 text-[13px] md:text-xl font-bold whitespace-nowrap">
             {formatDate(currentTime)}
@@ -86,9 +85,7 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
         </div>
       </div>
 
-      {/* 2단: 아이콘(좌) + 위치/날씨(우) */}
       <div className="flex items-center justify-between w-full border-t border-[#3a3a5e]/30 pt-2">
-        {/* 2단 좌측: 모드 버튼 (모서리 규격 통일: rounded-lg) */}
         <div className="flex items-center space-x-2 md:space-x-4">
           {[
             { mode: AppMode.CALENDAR, Icon: Calendar },
@@ -114,14 +111,13 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
           ))}
         </div>
 
-        {/* 2단 우측: 위치 및 날씨 정보 (글자 크기 20% 확대) */}
         <div className="flex flex-col text-right leading-tight shrink-0">
-          {isLoadingWeather ? (
+          {!weather || isLoadingWeather ? (
             <div className="animate-pulse flex flex-col items-end space-y-1">
               <div className="h-3 bg-[#2c2c2e] rounded w-20"></div>
               <div className="h-5 bg-[#2c2c2e] rounded w-24"></div>
             </div>
-          ) : weather ? (
+          ) : (
             <>
               <div className="flex items-center justify-end text-blue-400 text-[13px] md:text-lg font-bold whitespace-nowrap space-x-1">
                 <span className="text-blue-500">{weather.minTemp}°</span>
@@ -135,8 +131,6 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
                 <span>{weather.temp}°C {weather.condition}</span>
               </div>
             </>
-          ) : (
-            <span className="text-gray-600 text-[13px]">연동 대기</span>
           )}
         </div>
       </div>

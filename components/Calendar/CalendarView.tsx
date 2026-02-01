@@ -131,21 +131,19 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
       ${mode === 'copy' ? 'border-blue-500/20' : 
         mode === 'delete' ? 'border-rose-500/20' : 'border-transparent'}`}
     >
-      {/* 상단 타이틀 및 모드 제어 영역 */}
       <div className="flex flex-col w-full mb-1">
         
-        {/* 첫째줄: 타이틀(좌) + 작업 모드 라디오(우) */}
         <div className="flex items-center justify-between w-full h-10">
           <div className="flex-1 flex justify-start">
             {isEditingTitle ? (
-              <input autoFocus className="bg-[#2c2c2e] border border-blue-500 rounded px-1.5 py-0.5 text-base font-black text-white outline-none w-full max-w-xs" value={calendarTitle} onChange={(e) => setCalendarTitle(e.target.value)} onBlur={() => setIsEditingTitle(false)} onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)} />
+              <input autoFocus className="bg-[#2c2c2e] border border-blue-500 rounded px-1.5 py-0.5 text-base font-black text-white outline-none w-fit max-w-xs" value={calendarTitle} onChange={(e) => setCalendarTitle(e.target.value)} onBlur={() => setIsEditingTitle(false)} onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)} />
             ) : (
-              <h2 className="text-lg md:text-2xl font-black text-white cursor-pointer tracking-tighter whitespace-nowrap" onClick={() => setIsEditingTitle(true)}>{calendarTitle}</h2>
+              /* 수정: w-fit 적용 */
+              <h2 className="text-lg md:text-2xl font-black text-white cursor-pointer tracking-tighter whitespace-nowrap w-fit hover:text-blue-400 transition-colors" onClick={() => setIsEditingTitle(true)}>{calendarTitle}</h2>
             )}
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* 작업 모드 버튼: 크기 및 모서리(rounded) 문자전송버튼 규격 통합 */}
             <div className="flex bg-[#1a1a2e] p-0.5 rounded border border-[#3a3a5e] shadow-lg">
               <button onClick={() => { setMode('normal'); setClipboard([]); }} className={`p-1.5 rounded transition-all ${mode === 'normal' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><MousePointer2 className="w-5 h-5 text-amber-400" /></button>
               <button onClick={() => setMode('copy')} className={`p-1.5 rounded transition-all ${mode === 'copy' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><Copy className="w-5 h-5 text-cyan-400" /></button>
@@ -158,7 +156,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
           </div>
         </div>
 
-        {/* 둘째줄: 연월이동(좌) + 엑셀(우) - 년월 글자크기 2배 확대 */}
         <div className="flex items-center justify-between w-full h-12 border-t border-[#3a3a5e]/20 pt-1">
           <div className="flex items-center bg-[#1a1a2e] rounded p-0.5 border border-[#3a3a5e] shadow-md">
             <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1.5 hover:bg-[#2c2c2e] rounded"><ChevronLeft className="w-6 h-6 text-blue-400" /></button>
@@ -169,7 +166,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* 엑셀 버튼: 문자전송버튼(p-1.5, rounded) 규격 동기화 */}
             <button onClick={exportToExcel} className="p-1.5 bg-emerald-700 border border-emerald-500/50 rounded text-white shadow-sm" title="월간 저장"><FileDown className="w-5 h-5" /></button>
             <label className="p-1.5 bg-[#1a1a2e] border border-[#3a3a5e] rounded cursor-pointer hover:bg-[#3a3a5e]" title="엑셀 업로드">
               <FileUp className="w-5 h-5 text-emerald-400" />
@@ -179,7 +175,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
         </div>
       </div>
 
-      {/* 달력 그리드 영역 (모서리 rounded 규격 통일) */}
       <div className="flex-grow grid grid-cols-7 gap-1 md:gap-2 overflow-auto">
         {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
           <div key={day} className="text-center font-black py-0.5 text-[10px] md:text-sm" style={{ color: idx === 0 ? COLORS.SUNDAY : idx === 6 ? COLORS.SATURDAY : '#6b7280' }}>{day}</div>
