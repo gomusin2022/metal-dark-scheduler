@@ -41,98 +41,83 @@ const Header: React.FC<HeaderProps> = ({ mode, setMode, title, setTitle }) => {
     fetchWeather();
   }, []);
 
-  const formatDate = (date: Date) => {
-    const days = ['일', '월', '화', '수', '목', '금', '토'];
-    return `${date.getFullYear()}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getDate().toString().padStart(2, '0')} (${days[date.getDay()]})`;
-  };
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-  };
+  const menuItems = [
+    { mode: AppMode.CALENDAR, icon: Calendar },
+    { mode: AppMode.MEMBER, icon: Users },
+    { mode: AppMode.NOTE, icon: StickyNote },
+    { mode: AppMode.YOUTUBE, icon: Youtube },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 bg-[#1a1a2e] border-b border-[#3a3a5e] p-4 flex flex-col shadow-2xl transition-all duration-300 gap-3">
-      
-      <div className="flex items-center justify-between w-full">
-        <div className="flex-1 flex justify-start pr-2 overflow-hidden">
-          {isEditingTitle ? (
-            <input
-              autoFocus
-              className="bg-[#2c2c2e] border border-blue-500 rounded-lg px-2 py-1 text-2xl md:text-4xl font-black w-fit max-w-full outline-none text-white"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onBlur={() => setIsEditingTitle(false)}
-              onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
-            />
-          ) : (
-            /* 수정: w-fit 적용으로 클릭 범위 제한 */
-            <h1 
-              className="text-2xl md:text-5xl lg:text-6xl font-black text-white cursor-pointer hover:text-blue-400 transition-colors whitespace-nowrap overflow-hidden text-ellipsis tracking-tighter w-fit"
-              onClick={() => setIsEditingTitle(true)}
-            >
-              {title}
-            </h1>
-          )}
-        </div>
-
-        <div className="flex flex-col text-right leading-tight shrink-0 min-w-[140px] md:min-w-[220px]">
-          <span className="text-blue-400 text-[13px] md:text-xl font-bold whitespace-nowrap">
-            {formatDate(currentTime)}
-          </span>
-          <span className="text-blue-400 text-lg md:text-4xl font-black tracking-tighter whitespace-nowrap tabular-nums">
-            {formatTime(currentTime)}
-          </span>
+    <header className="w-full py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* 로고 및 타이틀 섹션 */}
+      <div className="flex flex-col shrink-0 items-center md:items-start leading-tight">
+        {isEditingTitle ? (
+          <input
+            autoFocus
+            className="bg-transparent border-b border-blue-500 text-2xl md:text-4xl font-black outline-none w-full max-w-[300px]"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={() => setIsEditingTitle(false)}
+            onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
+          />
+        ) : (
+          <h1 
+            className="text-2xl md:text-4xl font-black tracking-tighter cursor-pointer hover:text-blue-400 transition-colors whitespace-nowrap"
+            onDoubleClick={() => setIsEditingTitle(true)}
+          >
+            {title}
+          </h1>
+        )}
+        <div className="flex items-center space-x-2 text-gray-400 mt-1 uppercase tracking-widest text-[10px] md:text-sm font-bold">
+          <span className="text-blue-500">Digital</span>
+          <span className="w-1 h-1 bg-gray-600 rounded-full" />
+          <span>Management</span>
+          <span className="w-1 h-1 bg-gray-600 rounded-full" />
+          <span className="text-emerald-500">System</span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between w-full border-t border-[#3a3a5e]/30 pt-2">
-        <div className="flex items-center space-x-2 md:space-x-4">
-          {[
-            { mode: AppMode.CALENDAR, Icon: Calendar },
-            { mode: AppMode.MEMBER, Icon: Users },
-            { mode: AppMode.NOTE, Icon: StickyNote },
-            { mode: AppMode.YOUTUBE, Icon: Youtube }
-          ].map(({ mode: m, Icon }) => (
-            <button
-              key={m}
-              onClick={() => {
-                if (m === AppMode.YOUTUBE) {
-                  window.open("https://www.youtube.com/channel/UCkJOv1qeGXiaVjrA81UQj-w", "_blank");
-                } else {
-                  setMode(m);
-                }
-              }}
-              className={`p-2 md:p-3.5 rounded-lg flex items-center justify-center transition-all ${mode === m ? 'bg-blue-600 scale-105 shadow-lg shadow-blue-900' : 'bg-[#2c2c2e] hover:bg-[#3a3a5e]'}`}
-            >
-              <Icon 
-                className={`w-6 h-6 md:w-9 md:h-9 ${m === AppMode.YOUTUBE ? 'text-[#FF0000]' : 'text-white'}`} 
-              />
-            </button>
-          ))}
-        </div>
+      {/* 중앙 메뉴 버튼 섹션 */}
+      <div className="flex items-center bg-[#252545] p-1.5 rounded-2xl border border-[#3a3a5e] shadow-inner">
+        {menuItems.map(({ mode: m, icon: Icon }) => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            className={`p-2.5 md:p-3.5 rounded-xl transition-all duration-300 ${
+              mode === m 
+              ? 'bg-blue-600 text-white shadow-lg scale-105' 
+              : 'text-gray-400 hover:text-white hover:bg-[#3a3a5e]'}`}
+          >
+            <Icon 
+              className={`w-6 h-6 md:w-9 md:h-9 ${m === AppMode.YOUTUBE ? 'text-[#FF0000]' : 'text-white'}`} 
+            />
+          </button>
+        ))}
+      </div>
 
-        <div className="flex flex-col text-right leading-tight shrink-0">
-          {!weather || isLoadingWeather ? (
-            <div className="animate-pulse flex flex-col items-end space-y-1">
-              <div className="h-3 bg-[#2c2c2e] rounded w-20"></div>
-              <div className="h-5 bg-[#2c2c2e] rounded w-24"></div>
+      {/* 우측 시간 및 날씨 정보 섹션 */}
+      <div className="flex flex-col text-right leading-tight shrink-0 min-w-[150px]">
+        {!weather || isLoadingWeather ? (
+          <div className="animate-pulse flex flex-col items-end space-y-1">
+            <div className="h-3 bg-[#2c2c2e] rounded w-20"></div>
+            <div className="h-5 bg-[#2c2c2e] rounded w-24"></div>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-end text-blue-400 text-[13px] md:text-lg font-bold whitespace-nowrap space-x-1">
+              <span className="text-blue-500">{weather.minTemp}°</span>
+              <span className="text-gray-500">/</span>
+              <span className="text-rose-500">{weather.maxTemp}°</span>
+              <MapPin className="w-4 h-4 ml-1 text-blue-500" />
+              <span>{weather.location}</span>
             </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-end text-blue-400 text-[13px] md:text-lg font-bold whitespace-nowrap space-x-1">
-                <span className="text-blue-500">{weather.minTemp}°</span>
-                <span className="text-gray-500">/</span>
-                <span className="text-rose-500">{weather.maxTemp}°</span>
-                <MapPin className="w-4 h-4 ml-1 text-blue-500" />
-                <span>{weather.location}</span>
-              </div>
-              <div className="flex items-center justify-end text-emerald-400 text-base md:text-[28px] font-black tracking-tighter whitespace-nowrap">
-                <CloudSun className="w-6 h-6 md:w-8 md:h-8 mr-1.5" />
-                <span>{weather.temp}°C {weather.condition}</span>
-              </div>
-            </>
-          )}
-        </div>
+            <div className="flex items-center justify-end text-emerald-400 text-base md:text-[28px] font-black tracking-tighter whitespace-nowrap">
+              <CloudSun className="w-6 h-6 md:w-9 md:h-9 mr-2 text-emerald-500" />
+              <span>{currentTime.toLocaleTimeString('ko-KR', { hour12: false })}</span>
+            </div>
+          </>
+        )}
       </div>
     </header>
   );

@@ -1,5 +1,5 @@
 /**
- * App.tsx - 디자인 유지 및 레이아웃 최적화 전체 소스
+ * App.tsx - 레이아웃 규격화 및 폭 동기화 적용
  */
 import React, { useState, useEffect } from 'react';
 import { AppMode, Schedule, Member, Note } from './types';
@@ -69,10 +69,15 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#121212] flex flex-col transition-colors duration-500 text-gray-200">
-      <Header mode={mode} setMode={setMode} title={appTitle} setTitle={setAppTitle} />
+      {/* Header 컨테이너: App의 메인 폭과 일치시킴 */}
+      <div className="w-full bg-[#1a1a2e] border-b border-[#3a3a5e] sticky top-0 z-50">
+        <div className="max-w-[1600px] mx-auto">
+          <Header mode={mode} setMode={setMode} title={appTitle} setTitle={setAppTitle} />
+        </div>
+      </div>
       
-      {/* 수정: p-1(약 4px)을 주어 자식의 border-4가 잘리지 않도록 보호하며 너비는 100%를 허용합니다. */}
-      <main className="flex-grow relative p-1 overflow-x-hidden">
+      {/* 메인 콘텐츠 영역: Header와 동일한 max-width 및 px 적용 */}
+      <main className="flex-grow flex flex-col w-full max-w-[1600px] mx-auto px-2 md:px-4 py-4 overflow-x-hidden">
         {renderContent()}
       </main>
     </div>

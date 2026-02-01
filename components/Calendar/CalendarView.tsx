@@ -1,5 +1,5 @@
 /**
- * CalendarView.tsx - 디자인 유지 및 가로 폭 100% 강제 확장
+ * CalendarView.tsx - 디자인 유지 및 가로 폭 100% 동기화 적용
  */
 import React, { useState, useRef } from 'react';
 import { 
@@ -120,47 +120,45 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
   };
 
   return (
-    /* 최외곽: w-full과 mx-0으로 좌우 정렬 간섭을 제거합니다. */
-    <div className={`flex flex-col h-full bg-[#121212] px-1 md:px-4 pt-0 pb-2 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] w-full mx-0 box-border
-      ${mode === 'copy' ? 'border-blue-500/20' : 
-        mode === 'delete' ? 'border-rose-500/20' : 'border-transparent'}`}
+    <div className={`flex flex-col h-full bg-[#121212] pt-0 pb-4 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] w-full box-border
+      ${mode === 'copy' ? 'border-blue-500/40' : 
+        mode === 'delete' ? 'border-rose-500/40' : 'border-[#1a1a2e]'}`}
     >
-      <div className="flex flex-col w-full mb-1">
-        <div className="flex items-center justify-between w-full h-10 px-1">
+      <div className="flex flex-col w-full mb-1 px-4 pt-4">
+        <div className="flex items-center justify-between w-full h-12">
           <div className="flex-1 flex justify-start">
             {isEditingTitle ? (
-              <input autoFocus className="bg-[#2c2c2e] border border-blue-500 rounded px-1.5 py-0.5 text-base font-black text-white outline-none w-fit" value={calendarTitle} onChange={(e) => setCalendarTitle(e.target.value)} onBlur={() => setIsEditingTitle(false)} onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)} />
+              <input autoFocus className="bg-[#2c2c2e] border border-blue-500 rounded px-2 py-1 text-xl font-black text-white outline-none w-fit" value={calendarTitle} onChange={(e) => setCalendarTitle(e.target.value)} onBlur={() => setIsEditingTitle(false)} onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)} />
             ) : (
-              <h2 className="text-lg md:text-2xl font-black text-white cursor-pointer tracking-tighter w-fit hover:text-blue-400" onClick={() => setIsEditingTitle(true)}>{calendarTitle}</h2>
+              <h2 className="text-xl md:text-3xl font-black text-white cursor-pointer tracking-tighter w-fit hover:text-blue-400" onClick={() => setIsEditingTitle(true)}>{calendarTitle}</h2>
             )}
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <div className="flex bg-[#1a1a2e] p-0.5 rounded border border-[#3a3a5e] shadow-lg">
-              <button onClick={() => { setMode('normal'); setClipboard([]); }} className={`p-1.5 rounded transition-all ${mode === 'normal' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><MousePointer2 className="w-5 h-5 text-amber-400" /></button>
-              <button onClick={() => setMode('copy')} className={`p-1.5 rounded transition-all ${mode === 'copy' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><Copy className="w-5 h-5 text-cyan-400" /></button>
-              <button onClick={() => setMode('delete')} className={`p-1.5 rounded transition-all ${mode === 'delete' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><Trash2 className="w-5 h-5 text-rose-500" /></button>
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex bg-[#1a1a2e] p-1 rounded-xl border border-[#3a3a5e] shadow-lg">
+              <button onClick={() => { setMode('normal'); setClipboard([]); }} className={`p-2 rounded-lg transition-all ${mode === 'normal' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><MousePointer2 className="w-5 h-5 text-amber-400" /></button>
+              <button onClick={() => setMode('copy')} className={`p-2 rounded-lg transition-all ${mode === 'copy' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><Copy className="w-5 h-5 text-cyan-400" /></button>
+              <button onClick={() => setMode('delete')} className={`p-2 rounded-lg transition-all ${mode === 'delete' ? 'bg-blue-600 shadow-md' : 'hover:bg-[#2c2c2e]'}`}><Trash2 className="w-5 h-5 text-rose-500" /></button>
             </div>
-            <button onClick={handleUndo} className="p-1.5 bg-[#1a1a2e] border border-[#3a3a5e] rounded text-emerald-400 relative"><RotateCcw className="w-5 h-5" />{undoStack.length > 0 && <span className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-black">{undoStack.length}</span>}</button>
+            <button onClick={handleUndo} className="p-2 bg-[#1a1a2e] border border-[#3a3a5e] rounded-xl text-emerald-400 relative hover:bg-[#2c2c2e]"><RotateCcw className="w-6 h-6" />{undoStack.length > 0 && <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black ring-2 ring-[#121212]">{undoStack.length}</span>}</button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between w-full h-12 border-t border-[#3a3a5e]/20 pt-1 px-1">
-          <div className="flex items-center bg-[#1a1a2e] rounded p-0.5 border border-[#3a3a5e] shadow-md">
-            <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1.5 hover:bg-[#2c2c2e] rounded"><ChevronLeft className="w-6 h-6 text-blue-400" /></button>
-            <span className="text-xl md:text-3xl font-black px-4 min-w-[120px] text-center text-white tabular-nums">{format(currentMonth, 'yyyy. MM', { locale: ko })}</span>
-            <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-1.5 hover:bg-[#2c2c2e] rounded"><ChevronRight className="w-6 h-6 text-blue-400" /></button>
+        <div className="flex items-center justify-between w-full h-14 border-t border-[#3a3a5e]/30 mt-2 pt-2">
+          <div className="flex items-center bg-[#1a1a2e] rounded-xl p-1 border border-[#3a3a5e] shadow-md">
+            <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-2 hover:bg-[#2c2c2e] rounded-lg"><ChevronLeft className="w-6 h-6 text-blue-400" /></button>
+            <span className="text-xl md:text-3xl font-black px-6 min-w-[140px] text-center text-white tabular-nums">{format(currentMonth, 'yyyy. MM', { locale: ko })}</span>
+            <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-2 hover:bg-[#2c2c2e] rounded-lg"><ChevronRight className="w-6 h-6 text-blue-400" /></button>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button onClick={exportToExcel} className="p-1.5 bg-emerald-700 border border-emerald-500/50 rounded text-white shadow-sm" title="월간 저장"><FileDown className="w-5 h-5" /></button>
-            <label className="p-1.5 bg-[#1a1a2e] border border-[#3a3a5e] rounded cursor-pointer hover:bg-[#3a3a5e]" title="엑셀 업로드"><FileUp className="w-5 h-5 text-emerald-400" /><input type="file" ref={fileInputRef} onChange={importFromExcel} className="hidden" accept=".xlsx, .xls" /></label>
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={exportToExcel} className="p-2.5 bg-emerald-700 hover:bg-emerald-600 border border-emerald-500/50 rounded-xl text-white shadow-sm transition-colors" title="월간 저장"><FileDown className="w-6 h-6" /></button>
+            <label className="p-2.5 bg-[#1a1a2e] border border-[#3a3a5e] rounded-xl cursor-pointer hover:bg-[#3a3a5e] transition-colors" title="엑셀 업로드"><FileUp className="w-6 h-6 text-emerald-400" /><input type="file" ref={fileInputRef} onChange={importFromExcel} className="hidden" accept=".xlsx, .xls" /></label>
           </div>
         </div>
       </div>
 
-      {/* 해결 포인트: grid에 w-full을 주고 자식들이 가로폭을 강제 점유하게 합니다. */}
-      <div className="flex-grow grid grid-cols-7 gap-1 md:gap-2 w-full place-items-stretch overflow-auto">
+      <div className="flex-grow grid grid-cols-7 gap-1 md:gap-3 w-full px-4 mt-2 place-items-stretch overflow-auto">
         {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
-          <div key={day} className="text-center font-black py-0.5 text-[10px] md:text-sm" style={{ color: idx === 0 ? COLORS.SUNDAY : idx === 6 ? COLORS.SATURDAY : '#6b7280' }}>{day}</div>
+          <div key={day} className="text-center font-black py-1 text-xs md:text-base border-b border-[#3a3a5e]/20" style={{ color: idx === 0 ? COLORS.SUNDAY : idx === 6 ? COLORS.SATURDAY : '#94a3b8' }}>{day}</div>
         ))}
         {calendarDays.map((day) => {
           const daySchedules = schedules.filter(s => isSameDay(new Date(s.date), day));
@@ -168,19 +166,18 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
           const { isRedDay, isSaturday, label } = getDayStatus(day);
           let dayColor = COLORS.TEXT_PRIMARY;
           if (isRedDay) dayColor = COLORS.SUNDAY; else if (isSaturday) dayColor = COLORS.SATURDAY;
-          if (!isCurrentMonth) dayColor = 'rgba(156, 163, 175, 0.15)';
+          if (!isCurrentMonth) dayColor = 'rgba(148, 163, 184, 0.1)';
 
           return (
-            /* w-full과 flex-grow를 통해 각 칸이 가로를 최대한 채우도록 합니다. */
             <div key={day.toString()} onClick={() => { if (mode === 'normal') onDateClick(day); else if (mode === 'copy') handleCopyAction(day); else if (mode === 'delete') handleDeleteAction(day); }} 
-                 className={`w-full flex-grow min-h-[80px] md:min-h-[110px] p-1 md:p-2 rounded border transition-all cursor-pointer flex flex-col items-center text-center relative min-w-0 ${isCurrentMonth ? 'bg-[#1a1a2e] border-[#3a3a5e]' : 'bg-transparent border-transparent opacity-10'} ${mode === 'delete' && daySchedules.length > 0 ? 'hover:bg-rose-900/20 hover:border-rose-500' : 'hover:border-blue-500 hover:bg-[#252545]'} ${isSameDay(day, new Date()) ? 'ring-2 ring-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.2)]' : ''}`}>
-              <div className="flex items-baseline justify-center gap-1 w-full">
-                <span className="text-lg md:text-2xl font-black" style={{ color: dayColor }}>{format(day, 'd')}</span>
-                {isCurrentMonth && label && <span className="text-[7px] md:text-[10px] font-bold truncate" style={{ color: COLORS.SUNDAY }}>{label}</span>}
+                 className={`w-full flex-grow min-h-[90px] md:min-h-[130px] p-1 md:p-2 rounded-xl border transition-all cursor-pointer flex flex-col items-center text-center relative min-w-0 ${isCurrentMonth ? 'bg-[#1a1a2e]/50 border-[#3a3a5e]/50' : 'bg-transparent border-transparent opacity-10'} ${mode === 'delete' && daySchedules.length > 0 ? 'hover:bg-rose-900/30 hover:border-rose-500' : 'hover:border-blue-500/50 hover:bg-[#252545]'} ${isSameDay(day, new Date()) ? 'ring-2 ring-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)] bg-[#252545]' : ''}`}>
+              <div className="flex items-baseline justify-center gap-1 w-full mb-1">
+                <span className="text-xl md:text-2xl font-black" style={{ color: dayColor }}>{format(day, 'd')}</span>
+                {isCurrentMonth && label && <span className="text-[8px] md:text-[10px] font-bold truncate max-w-[40px]" style={{ color: COLORS.SUNDAY }}>{label}</span>}
               </div>
-              <div className="mt-1 space-y-1 w-full flex flex-col items-center overflow-hidden px-0.5">
-                {daySchedules.slice(0, 3).map((s) => (<div key={s.id} className="w-full text-[8px] md:text-[11px] px-1 py-0.5 bg-blue-600/10 text-blue-300 rounded-md truncate font-bold border border-blue-500/10 text-center">{s.title}</div>))}
-                {daySchedules.length > 3 && <div className="text-[8px] text-gray-500 font-black">+{daySchedules.length - 3}</div>}
+              <div className="flex-grow w-full flex flex-col items-center gap-1 overflow-hidden">
+                {daySchedules.slice(0, 3).map((s) => (<div key={s.id} className="w-full text-[9px] md:text-[11px] px-1.5 py-1 bg-blue-600/20 text-blue-200 rounded-lg truncate font-bold border border-blue-500/20 text-center">{s.title}</div>))}
+                {daySchedules.length > 3 && <div className="text-[10px] text-blue-400 font-black mt-0.5">+{daySchedules.length - 3} more</div>}
               </div>
             </div>
           );
