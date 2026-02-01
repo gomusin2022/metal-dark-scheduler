@@ -264,6 +264,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
         </div>
       </div>
 
+      {/* [하단 개발자 정보 문구 추가] */}
+      <div className="pb-4 text-center text-blue-500/80 text-[10px] md:text-sm font-bold tracking-tight">
+        This app was developed by Yongkyu Kim in January 2026
+      </div>
+
       {clipboard.length > 0 && mode === 'copy' && (
         <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
           <div className="flex items-center gap-2 px-6 py-3 bg-[#2c2c2e] text-cyan-400 rounded-full shadow-2xl font-black border border-cyan-900/60 text-sm">
