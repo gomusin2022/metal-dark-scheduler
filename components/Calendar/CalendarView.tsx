@@ -127,18 +127,17 @@ const CalendarView: React.FC<CalendarViewProps> = ({ schedules, onDateClick, onU
   };
 
   return (
-    <div className={`flex flex-col h-full bg-[#121212] p-1.5 md:p-6 pt-0 text-gray-200 transition-all duration-500 border-4 rounded-[2rem]
+    /* 수정: px-2와 mx-0.5를 추가하여 좌우 밀림 방지 및 보더 시인성 확보 */
+    <div className={`flex flex-col h-full bg-[#121212] px-2 md:px-6 pt-0 pb-1.5 text-gray-200 transition-all duration-500 border-4 rounded-[2rem] mx-0.5
       ${mode === 'copy' ? 'border-blue-500/20' : 
         mode === 'delete' ? 'border-rose-500/20' : 'border-transparent'}`}
     >
       <div className="flex flex-col w-full mb-1">
-        
         <div className="flex items-center justify-between w-full h-10">
           <div className="flex-1 flex justify-start">
             {isEditingTitle ? (
               <input autoFocus className="bg-[#2c2c2e] border border-blue-500 rounded px-1.5 py-0.5 text-base font-black text-white outline-none w-fit max-w-xs" value={calendarTitle} onChange={(e) => setCalendarTitle(e.target.value)} onBlur={() => setIsEditingTitle(false)} onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)} />
             ) : (
-              /* 수정: w-fit 적용 */
               <h2 className="text-lg md:text-2xl font-black text-white cursor-pointer tracking-tighter whitespace-nowrap w-fit hover:text-blue-400 transition-colors" onClick={() => setIsEditingTitle(true)}>{calendarTitle}</h2>
             )}
           </div>
