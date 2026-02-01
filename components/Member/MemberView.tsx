@@ -25,7 +25,7 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // 전화번호 자동 이동을 위한 Ref 추가
+  // 전화번호 자동 이동을 위한 Ref
   const phoneMidRef = useRef<HTMLInputElement>(null);
   const phoneEndRef = useRef<HTMLInputElement>(null);
 
@@ -59,14 +59,18 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
     });
   }, [members, sortCriteria]);
 
+  // 전화번호 정규화 (중복 체크 및 데이터 정제용)
+  const normalizeTo8Digits = (phone: string) => {
+    return (phone || '').replace(/\D/g, '').slice(-8);
+  };
+
   const formatPhoneNumber = (value: string) => {
     const digits = value.replace(/\D/g, '');
-    let res = '';
-    const cleanDigits = digits.length === 8 ? '010' + digits : (digits.startsWith('010') ? digits : '010' + digits);
-    if (cleanDigits.length <= 3) res = cleanDigits;
-    else if (cleanDigits.length <= 7) res = `${cleanDigits.slice(0, 3)}-${cleanDigits.slice(3)}`;
-    else res = `${cleanDigits.slice(0, 3)}-${cleanDigits.slice(3, 7)}-${cleanDigits.slice(7, 11)}`;
-    return res;
+    const clean8 = digits.slice(-8);
+    if (clean8.length === 8) {
+      return `010-${clean8.slice(0, 4)}-${clean8.slice(4)}`;
+    }
+    return '010--';
   };
 
   // 전화번호 세그먼트 입력 로직
@@ -113,6 +117,7 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
   };
 
   const processImportedData = (newData: any[], mode: 'append' | 'overwrite') => {
+    // 1. 가져온 데이터 정규화 (뒤 8자리 기준)
     const formattedData: Member[] = newData.map((d) => ({
       id: crypto.randomUUID(), sn: 0,
       name: d['성명'] || d.name || '',
@@ -122,11 +127,20 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
       attendance: d['출석'] === 'O' || Boolean(d.attendance),
       joined: d['가입'] === 'O' || Boolean(d.joined)
     }));
+
     if (mode === 'overwrite') {
       setMembers(formattedData.map((m, idx) => ({ ...m, sn: idx + 1 })));
     } else {
-      const currentPhones = new Set(members.map(m => m.phone));
-      const nonDuplicates = formattedData.filter(m => !currentPhones.has(m.phone));
+      // 2. 중복 체크 로직 개선: 기존 회원들의 번호에서 뒤 8자리만 추출하여 Set 생성
+      const currentPhoneKeys = new Set(members.map(m => normalizeTo8Digits(m.phone)));
+      
+      // 3. 새 데이터 중 뒤 8자리가 겹치지 않는 것만 필터링 (010 유무 상관없이 필터링됨)
+      const nonDuplicates = formattedData.filter(m => {
+        const newKey = normalizeTo8Digits(m.phone);
+        // 번호가 유효(8자리)하고 기존 목록에 없을 때만 추가
+        return newKey.length === 8 && !currentPhoneKeys.has(newKey);
+      });
+
       setMembers([...members, ...nonDuplicates].map((m, idx) => ({ ...m, sn: idx + 1 })));
     }
   };
@@ -163,7 +177,8 @@ const MemberView: React.FC<MemberViewProps> = ({ members, setMembers, onHome }) 
   };
 
   const updateMember = (id: string, field: keyof Member, value: any) => {
-    setMembers(members.map(m => m.id === id ? { ...m, [field]: field === 'phone' ? formatPhoneNumber(value) : value } : m));
+    // phone 필드는 handlePhoneChange에서 별도로 처리하므로 여기서는 일반 업데이트만 수행
+    setMembers(members.map(m => m.id === id ? { ...m, [field]: value } : m));
   };
 
   const deleteMember = (id: string) => {
